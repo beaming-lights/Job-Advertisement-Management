@@ -5,24 +5,24 @@ A modern, responsive job board website built with NiceGUI and Tailwind CSS. This
 ## Features
 
 ### For Job Seekers
-- 🔍 **Advanced Job Search** - Search by keywords, location, category, and job type
-- 📱 **Responsive Design** - Optimized for desktop, tablet, and mobile devices
-- 🎯 **Smart Filters** - Filter jobs by category, type, location, and more
-- 📄 **Detailed Job Views** - Complete job descriptions with requirements and company info
-- 🎨 **Modern UI** - Beautiful, intuitive interface with smooth animations
+-  **Advanced Job Search** - Search by keywords, location, category, and job type
+-  **Responsive Design** - Optimized for desktop, tablet, and mobile devices
+-  **Smart Filters** - Filter jobs by category, type, location, and more
+-  **Detailed Job Views** - Complete job descriptions with requirements and company info
+-  **Modern UI** - Beautiful, intuitive interface with smooth animations
 
 ### For Vendors
-- ✏️ **Job Posting** - Easy-to-use form for creating job listings
-- 📊 **Vendor Dashboard** - Manage all job postings in one place
-- ✂️ **Edit & Delete** - Full CRUD operations for job management
-- 📈 **Analytics** - View job performance metrics and statistics
-- 🎯 **Job Categories** - Organize jobs by industry and type
+-  **Job Posting** - Easy-to-use form for creating job listings
+-  **Vendor Dashboard** - Manage all job postings in one place
+-  **Edit & Delete** - Full CRUD operations for job management
+-  **Analytics** - View job performance metrics and statistics
+-  **Job Categories** - Organize jobs by industry and type
 
 ### General Features
-- 🎠 **Full-Page Slider** - Engaging homepage with rotating hero sections
-- 🧭 **Responsive Navigation** - Mobile-friendly header and footer
-- 🔗 **API Integration** - Connects to your existing job API
-- ⚡ **Fast Performance** - Built with modern web technologies
+-  **Full-Page Slider** - Engaging homepage with rotating hero sections
+-  **Responsive Navigation** - Mobile-friendly header and footer
+-  **API Integration** - Connects to your existing job API
+-  **Fast Performance** - Built with modern web technologies
 
 ## Installation
 
