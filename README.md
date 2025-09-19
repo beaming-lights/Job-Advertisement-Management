@@ -42,11 +42,18 @@ A modern, responsive job board website built with NiceGUI and Tailwind CSS. This
    pip install -r requirements.txt
    ```
 
-3. **Configure your API**
-   Edit the `.env` file and update the API configuration:
+3. **Configure your environment**
+   Copy the example environment file and update with your settings:
+   ```bash
+   cp .env.example .env
+   ```
+   
+   Edit the `.env` file and update the configuration:
    ```env
    API_BASE_URL=http://your-api-domain.com/api
    API_KEY=your_api_key_here
+   APP_SECRET_KEY=your-secret-key-for-sessions
+   STORAGE_SECRET=your-storage-secret-key
    DEBUG=True
    PORT=8080
    ```

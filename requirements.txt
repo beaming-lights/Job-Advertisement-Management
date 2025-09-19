@@ -1,5 +1,14 @@
-nicegui
-requests
-python-dotenv
-pydantic
-uvicorn
+# Core Framework
+nicegui>=1.4.21
+
+# HTTP Requests
+requests>=2.31.0
+
+# Environment Variables
+python-dotenv>=1.0.0
+
+# Data Validation
+pydantic>=2.5.0
+
+# ASGI Server
+uvicorn>=0.24.0

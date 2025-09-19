@@ -177,19 +177,132 @@ class APIService:
             print(f"Error fetching categories: {e}")
             return ["Technology", "Marketing", "Sales", "Design", "Finance", "Operations"]
     
-    def get_applicants(self, filters: Optional[Dict] = None) -> List[Dict]:
-        """Fetch all applicants with optional filters"""
-        # This is a mock implementation using sample data.
-        # In a real application, this would fetch from an API endpoint.
+    def get_applicants(self):
+        """Get all applicants"""
         try:
-            # Simulate filtering
-            all_applicants = get_sample_applicants()
-            if filters and 'job_title' in filters:
-                return [app for app in all_applicants if app['job_title'] == filters['job_title']]
-            return all_applicants
+            response = requests.get(f"{self.base_url}/applicants", headers=self.headers)
+            if response.status_code == 200:
+                return response.json()
+            return []
         except Exception as e:
             print(f"Error fetching applicants: {e}")
             return []
+    
+    def get_saved_jobs(self):
+        """Get user's saved jobs"""
+        try:
+            # Mock data for now - replace with actual API call
+            return [
+                {
+                    "id": "1",
+                    "title": "Senior Python Developer",
+                    "company": "Tech Corp",
+                    "location": "San Francisco, CA",
+                    "salary": "$120,000 - $150,000",
+                    "job_type": "Full-time",
+                    "saved_date": "2024-01-15"
+                },
+                {
+                    "id": "2", 
+                    "title": "Frontend React Developer",
+                    "company": "StartupXYZ",
+                    "location": "Remote",
+                    "salary": "$90,000 - $120,000",
+                    "job_type": "Full-time",
+                    "saved_date": "2024-01-14"
+                }
+            ]
+        except Exception as e:
+            print(f"Error fetching saved jobs: {e}")
+            return []
+    
+    def get_applications(self):
+        """Get user's job applications"""
+        try:
+            # Mock data for now - replace with actual API call
+            return [
+                {
+                    "id": "1",
+                    "job_title": "Senior Python Developer",
+                    "company": "Tech Corp",
+                    "applied_date": "2024-01-15",
+                    "status": "interview",
+                    "resume_name": "John_Doe_Resume_2024.pdf"
+                },
+                {
+                    "id": "2",
+                    "job_title": "Data Scientist",
+                    "company": "AI Solutions Inc",
+                    "applied_date": "2024-01-12",
+                    "status": "applied",
+                    "resume_name": "John_Doe_Resume_2024.pdf"
+                },
+                {
+                    "id": "3",
+                    "job_title": "Full Stack Developer",
+                    "company": "WebDev Co",
+                    "applied_date": "2024-01-10",
+                    "status": "rejected",
+                    "resume_name": "John_Doe_Resume_2024.pdf"
+                }
+            ]
+        except Exception as e:
+            print(f"Error fetching applications: {e}")
+            return []
+    
+    def get_recommendations(self):
+        """Get AI-powered job recommendations"""
+        try:
+            # Mock data for now - replace with actual AI API call
+            return [
+                {
+                    "id": "1",
+                    "title": "Senior Software Engineer",
+                    "company": "Google",
+                    "location": "Mountain View, CA",
+                    "salary": "$150,000 - $200,000",
+                    "match_score": 95,
+                    "match_reasons": ["Python expertise", "5+ years experience", "Location preference"]
+                },
+                {
+                    "id": "2",
+                    "title": "Machine Learning Engineer", 
+                    "company": "OpenAI",
+                    "location": "San Francisco, CA",
+                    "salary": "$160,000 - $220,000",
+                    "match_score": 88,
+                    "match_reasons": ["AI/ML skills", "Python proficiency", "Research background"]
+                },
+                {
+                    "id": "3",
+                    "title": "Backend Developer",
+                    "company": "Netflix",
+                    "location": "Los Gatos, CA", 
+                    "salary": "$140,000 - $180,000",
+                    "match_score": 82,
+                    "match_reasons": ["Backend experience", "Scalability focus", "Tech stack match"]
+                }
+            ]
+        except Exception as e:
+            print(f"Error fetching recommendations: {e}")
+            return []
+    
+    def get_user_profile(self):
+        """Get user profile information"""
+        try:
+            # Mock data for now - replace with actual API call
+            return {
+                "name": "John Doe",
+                "email": "john.doe@example.com",
+                "skills": ["Python", "JavaScript", "React", "Django"],
+                "experience_level": "Senior",
+                "location": "San Francisco, CA",
+                "github": "https://github.com/johndoe",
+                "linkedin": "https://linkedin.com/in/johndoe"
+            }
+        except Exception as e:
+            print(f"Error fetching user profile: {e}")
+            return {}
 
     def search_jobs(self, query: str, filters: Optional[Dict] = None) -> List[Dict]:
         """Search jobs by query and filters"""

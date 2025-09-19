@@ -68,7 +68,7 @@ def home_page():
             with ui.row().classes("flex flex-wrap justify-center gap-8"):
                 # Card 1: Smart Job Search
                 with ui.card().classes(
-                    "w-full md:w-80 p-8 text-center bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2"
+                    "w-full md:w-96 p-8 text-center bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2"
                 ):
                     with ui.element("div").classes("flex flex-col items-center"):
                         with ui.element("div").classes(
@@ -84,7 +84,7 @@ def home_page():
 
                 # Card 2: Top Companies
                 with ui.card().classes(
-                    "w-full md:w-80 p-8 text-center bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2"
+                    "w-full md:w-96 p-8 text-center bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2"
                 ):
                     with ui.element("div").classes("flex flex-col items-center"):
                         with ui.element("div").classes(
@@ -100,7 +100,7 @@ def home_page():
 
                 # Card 3: Career Growth
                 with ui.card().classes(
-                    "w-full md:w-80 p-8 text-center bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2"
+                    "w-full md:w-96 p-8 text-center bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2"
                 ):
                     with ui.element("div").classes("flex flex-col items-center"):
                         with ui.element("div").classes(

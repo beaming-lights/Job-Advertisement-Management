@@ -28,10 +28,26 @@ html, body {
     overflow-x: hidden !important;
 }
 
-/* Override NiceGUI container constraints */
+/* Override NiceGUI container constraints and content overrides */
 .q-page-container, .q-layout, .q-page {
     padding-bottom: 0 !important;
     margin-bottom: 0 !important;
+}
+
+/* NiceGUI Content Override - Force footer outside content container */
+.nicegui-content {
+    overflow: visible !important;
+    position: relative !important;
+}
+
+.nicegui-content footer {
+    position: relative !important;
+    margin-left: calc(-50vw + 50%) !important;
+    margin-right: calc(-50vw + 50%) !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    left: 0 !important;
+    right: 0 !important;
 }
 
 /* Clear any floating elements before footer */
