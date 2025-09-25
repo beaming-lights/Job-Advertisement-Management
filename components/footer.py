@@ -108,8 +108,6 @@ def create_footer():
             with ui.row().classes('q-gutter-lg items-center flex justify-center'):
                 ui.link('Home', target='/').classes('text-gray-400 hover:text-white text-sm no-underline')
                 ui.link('Browse Jobs', target='/jobs').classes('text-gray-400 hover:text-white text-sm no-underline')
-                ui.link('Post a Job', target='/post-job').classes('text-gray-400 hover:text-white text-sm no-underline')
-                ui.link('Dashboard', target='/vendor-dashboard').classes('text-gray-400 hover:text-white text-sm no-underline')
 
             # # Right: Social Media + k to Top
             # with ui.column().classes('items-center md:items-end flex-grow'):

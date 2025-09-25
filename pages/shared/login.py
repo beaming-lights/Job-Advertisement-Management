@@ -61,23 +61,55 @@ def login_page():
     }
     
     def handle_login():
-        """Handle login form submission"""
+        """Handle login form submission with enhanced API support"""
+        # Validate inputs
         if not form_data["email"] or not form_data["password"]:
             ui.notify("Please fill in all fields", type="negative")
             return
         
-        result = auth_service.login(form_data["email"], form_data["password"])
+        # Validate email format
+        if "@" not in form_data["email"] or "." not in form_data["email"]:
+            ui.notify("Please enter a valid email address", type="negative")
+            return
         
-        if result["success"]:
-            ui.notify(f"Welcome back, {result['user']['name']}!", type="positive")
+        # Show loading notification
+        ui.notify("Signing in...", type="info")
+        
+        try:
+            result = auth_service.login(form_data["email"], form_data["password"])
             
-            # Redirect based on role
-            if result["user"]["role"] == "vendor":
-                ui.navigate.to("/vendor-dashboard")
+            if result["success"]:
+                # Determine user name for welcome message
+                user_name = result['user'].get('name') or result['user'].get('full_name') or form_data["email"].split('@')[0]
+                ui.notify(f"Welcome back, {user_name}!", type="positive")
+                
+                # Redirect based on role with enhanced role mapping
+                user_role = result["user"]["role"]
+                if user_role in ["vendor", "employer"]:
+                    ui.navigate.to("/vendor-dashboard")
+                elif user_role in ["user", "job_seeker"]:
+                    ui.navigate.to("/job-seeker-dashboard")
+                elif user_role == "admin":
+                    ui.navigate.to("/admin-dashboard")
+                else:
+                    # Default redirect for unknown roles
+                    ui.navigate.to("/")
             else:
-                ui.navigate.to("/job-seeker-dashboard")
-        else:
-            ui.notify(result["message"], type="negative")
+                # Enhanced error messages - ensure error_message is a string
+                error_message = str(result["message"]) if result.get("message") else "Login failed"
+                error_lower = error_message.lower()
+                
+                if "Invalid" in error_message:
+                    ui.notify("Invalid email or password. Please check your credentials and try again.", type="negative")
+                elif "timeout" in error_lower:
+                    ui.notify("Login request timed out. Please check your internet connection and try again.", type="warning")
+                elif "connect" in error_lower:
+                    ui.notify("Unable to connect to login service. Please try again later.", type="warning")
+                else:
+                    ui.notify(error_message, type="negative")
+        
+        except Exception as e:
+            ui.notify(f"An unexpected error occurred during login: {str(e)}", type="negative")
     
     # Hero Section
     with ui.element("section").classes("bg-gradient-to-br from-emerald-600 to-green-700 text-white py-20 min-h-screen flex items-center").style(
@@ -142,7 +174,7 @@ def login_page():
                             ui.link("Forgot password?", "#").classes("text-sm text-emerald-600 hover:text-emerald-700 font-medium")
                         
                         # Login button
-                        ui.button(
+                        login_button = ui.button(
                             "Sign In",
                             on_click=handle_login,
                             color="#10b981"
@@ -178,18 +210,19 @@ def login_page():
                 ui.label("Demo Credentials").classes("text-xl font-bold text-blue-800 mb-4")
                 
                 with ui.row().classes("w-full grid grid-cols-1 md:grid-cols-2 gap-6"):
-                    # Vendor demo
+                    # API Authentication Info
                     with ui.column().classes("space-y-2"):
-                        ui.label("Vendor Account").classes("font-semibold text-blue-700")
+                        ui.label("API Authentication").classes("font-semibold text-blue-700")
+                        ui.label("Real authentication with Job Hub API").classes("text-sm text-gray-700")
+                        ui.label("Register new accounts or use existing credentials").classes("text-sm text-gray-700")
+                        ui.label("Supports: job_seeker, employer, admin roles").classes("text-xs text-blue-600")
+                    
+                    # Local Fallback
+                    with ui.column().classes("space-y-2"):
+                        ui.label("Local Fallback Account").classes("font-semibold text-blue-700")
                         ui.label("Email: admin@test.com").classes("text-sm text-gray-700 font-mono")
                         ui.label("Password: admin123").classes("text-sm text-gray-700 font-mono")
-                        ui.label("Access: Full vendor dashboard").classes("text-xs text-blue-600")
-                    
-                    # User demo
-                    with ui.column().classes("space-y-2"):
-                        ui.label("Regular User Account").classes("font-semibold text-blue-700")
-                        ui.label("Create a new account with 'user' role").classes("text-sm text-gray-700")
-                        ui.label("Access: Browse jobs only").classes("text-xs text-blue-600")
+                        ui.label("Available if API is unavailable").classes("text-xs text-blue-600")
     
     # Footer
     create_footer()

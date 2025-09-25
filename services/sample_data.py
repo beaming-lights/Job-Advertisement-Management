@@ -5,16 +5,22 @@ def get_sample_jobs():
     return [
         {
             'id': '1',
-            'title': 'Join the Dream Team',
-            'company': 'Creative Inc.',
-            'location': 'Ablekuma',
-            'description': 'We are looking for a Senior Frontend Developer to join our dynamic team. You will be responsible for building user-facing features using React, TypeScript, and modern web technologies. The ideal candidate has 5+ years of experience in frontend development and a passion for creating exceptional user experiences.',
-            'requirements': 'Requirements:\n• 5+ years of frontend development experience\n• Proficiency in React, TypeScript, HTML5, CSS3\n• Experience with modern build tools (Webpack, Vite)\n• Knowledge of responsive design principles\n• Strong problem-solving skills\n• Bachelor\'s degree in Computer Science or related field',
-            'salary': '$120,000 - $150,000',
+            'title': 'Senior Frontend Developer',
+            'company': 'TechCorp Inc.',
+            'location': 'San Francisco, CA',
+            'description': 'Join our innovative team building the next generation of web applications! We are seeking a passionate Senior Frontend Developer to create exceptional user experiences using cutting-edge technologies. You\'ll work on high-impact projects in a collaborative, fast-paced environment with opportunities for growth and learning.',
+            'requirements': ['5+ years frontend development', 'React & TypeScript expertise', 'Modern build tools (Vite, Webpack)', 'Responsive design principles', 'Team collaboration', 'Problem-solving skills'],
+            'salary': '$120,000 - $160,000',
             'job_type': 'Full-time',
             'category': 'Technology',
-            'posted_date': '2024-01-15',
-            'vendor_id': 'vendor_1'
+            'posted_date': '2 days ago',
+            'remote': True,
+            'vendor_id': 'vendor_1',
+            'flyer': 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&h=400&fit=crop&crop=center',
+            'company_logo': 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=100&h=100&fit=crop&crop=center',
+            'benefits': ['Health Insurance', 'Remote Work', '401k Match', 'Learning Budget', 'Flexible Hours'],
+            'experience_level': 'Senior',
+            'urgent': False
         },
         {
             'id': '2',

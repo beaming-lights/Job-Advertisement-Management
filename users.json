@@ -1,0 +1,85 @@
+{
+  "admin@test.com": {
+    "password_hash": "ca4a1f49830ca333bc335a93d31bc2ff:ea3bc990d5229e8f7f1ec375f1dcf66a75d3683a9e3bbd2a1c7a386439eccbdb",
+    "role": "vendor",
+    "name": "Admin User",
+    "created_at": "2025-09-19T00:15:30.446457"
+  },
+  "232@gmail.com": {
+    "password_hash": "add540de88ded7e08ab39051b16e0824:46ac0535680bc1fe8fc543a8caeec20f3285ce20898e7a71aeccee6a13657744",
+    "role": "vendor",
+    "name": "Adams",
+    "created_at": "2025-09-19T00:58:58.205739"
+  },
+  "232@yail.com": {
+    "password_hash": "0d50f081d7a77134e4bfcfb09f4d118c:c663cd1a8ac4eb75e9b82e0a91681f65437ac586c69914c398c917f976a352ef",
+    "role": "vendor",
+    "name": "Second Vendor ",
+    "created_at": "2025-09-19T01:52:43.424351"
+  },
+  "kspark@gmail.com": {
+    "password_hash": "62842cc4d9b0375f5acc8be0fffd8f10:bdf1ededd9499159519bed7c996e846d47bd99fd68874d66bb84635cc99cb244",
+    "role": "user",
+    "name": "Kofi Sparkle",
+    "created_at": "2025-09-19T01:55:31.053179"
+  },
+  "123@gmail.com": {
+    "password_hash": "7b88a64e3f20f695a73b9a0307d66ff9:c8c88bb9c19b67375d8a56cd67257847945309147e695612aba30953c202f631",
+    "role": "user",
+    "name": "Adaking",
+    "created_at": "2025-09-19T08:36:05.963479"
+  },
+  "test@123.com": {
+    "password_hash": "b0c7c300b50a357f71e462bed0612b0d:18efc60848eb55647909cb581d162f139f4c742b905c2749b518d60dadde6163",
+    "role": "user",
+    "name": "tester",
+    "created_at": "2025-09-20T11:20:42.111846"
+  },
+  "mest@gmail.com": {
+    "password_hash": "5d1e772dd0ceb3a40c8338e80e2c15b2:74a5d8981086bd06d747d224b9e461d2a76dad9c5a1982dfe36dfe6e1055636d",
+    "role": "vendor",
+    "name": "MEST",
+    "created_at": "2025-09-20T15:12:06.072043"
+  },
+  "elisa@example.com": {
+    "password_hash": "9bd9453e473e5307b71691efd7db389b:e2ca24f631c3da7831013926a2b12ed83963b9e3b93ee49682edb5e4eb3c1816",
+    "role": "vendor",
+    "name": "Elisa",
+    "created_at": "2025-09-23T17:20:08.020664"
+  },
+  "test_vendor@example.com": {
+    "username": "test_vendor",
+    "role": "vendor",
+    "name": "Test Vendor",
+    "created_at": "2025-09-24T11:24:29.549163",
+    "api_registered": true
+  },
+  "test_jobseeker@example.com": {
+    "username": "test_jobseeker",
+    "role": "job_seeker",
+    "name": "Test Job Seeker",
+    "created_at": "2025-09-24T11:24:32.729961",
+    "api_registered": true
+  },
+  "employer_test@example.com": {
+    "username": "employer_test",
+    "role": "vendor",
+    "name": "Test Employer User",
+    "created_at": "2025-09-24T11:41:03.668587",
+    "api_registered": true
+  },
+  "jobseeker_test@example.com": {
+    "username": "jobseeker_test",
+    "role": "job_seeker",
+    "name": "Test Job Seeker User",
+    "created_at": "2025-09-24T11:41:06.508220",
+    "api_registered": true
+  },
+  "elisa@123.com": {
+    "username": "elisa",
+    "role": "vendor",
+    "name": "Admin0011",
+    "created_at": "2025-09-24T11:50:59.107077",
+    "api_registered": true
+  }
+}

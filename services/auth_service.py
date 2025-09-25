@@ -1,5 +1,6 @@
 """
 Authentication Service for User Session Management
+Enhanced to work with real API authentication
 Handles login, logout, session state, and role-based access control
 """
 
@@ -7,19 +8,23 @@ import os
 import json
 import hashlib
 import secrets
+import requests
 from typing import Dict, Optional, Literal
 from datetime import datetime, timedelta
 from nicegui import app, ui
 
-UserRole = Literal['vendor', 'user']
+UserRole = Literal['vendor', 'user', 'job_seeker', 'employer', 'admin']
 
 class AuthService:
     def __init__(self):
-        self.sessions = {}  # In production, use Redis or database
-        self.users = {}     # In production, use database
+        self.base_url = os.getenv('API_BASE_URL', 'https://advertisement-management-api-91xh.onrender.com').rstrip('/')
+        self.sessions = {}  # Keep for backward compatibility
+        self.users = {}     # Keep for fallback
         self.session_timeout = timedelta(hours=24)
-        self._storage_warned = False  # ensure we only warn once about storage_secret
-        self._load_users()
+        self._storage_warned = False
+        self.current_user = None
+        self.access_token = None
+        self._load_users()  # Load local users as fallback
     
     def _load_users(self):
         """Load users from file (in production, use database)"""
@@ -74,7 +79,38 @@ class AuthService:
             return False
     
     def register_user(self, email: str, password: str, name: str, role: UserRole) -> Dict:
-        """Register a new user"""
+        """Register a new user using API or fallback to local"""
+        # Try API registration first
+        if self.base_url:
+            try:
+                data = {
+                    "email": email,
+                    "password": password,
+                    "full_name": name,
+                    "role": role,
+                    "is_active": True
+                }
+                
+                response = requests.post(
+                    f"{self.base_url}/users/register",
+                    json=data,
+                    headers={'Content-Type': 'application/json'},
+                    timeout=10
+                )
+                
+                if response.status_code == 200:
+                    return {"success": True, "message": "Registration successful! Please login."}
+                elif response.status_code == 400:
+                    return {"success": False, "message": "Email already exists or invalid data"}
+                else:
+                    print(f"API registration failed: {response.status_code}")
+                    # Fall through to local registration
+                    
+            except Exception as e:
+                print(f"API registration error: {e}")
+                # Fall through to local registration
+        
+        # Fallback to local registration
         if email in self.users:
             return {"success": False, "message": "Email already exists"}
         
@@ -92,7 +128,71 @@ class AuthService:
         return {"success": True, "message": "User registered successfully"}
     
     def login(self, email: str, password: str) -> Dict:
-        """Authenticate user and create session"""
+        """Authenticate user using API or fallback to local"""
+        # Try API login first
+        if self.base_url:
+            try:
+                # API expects both username and email fields for login
+                # Generate username from email (same logic as registration)
+                username = email.split('@')[0] if email else ""
+                
+                data = {
+                    "username": username,
+                    "email": email,
+                    "password": password
+                }
+                
+                response = requests.post(
+                    f"{self.base_url}/users/login",
+                    data=data,  # Send as form data instead of JSON
+                    timeout=10
+                )
+                
+                if response.status_code == 200:
+                    login_data = response.json()
+                    
+                    # Extract token from API response
+                    self.access_token = login_data.get("access_token")
+                    
+                    # Get stored user info for role mapping
+                    stored_user = self.users.get(email, {})
+                    user_role = stored_user.get("role", "job_seeker")  # Default to job_seeker
+                    user_name = stored_user.get("name", username)
+                    
+                    self.current_user = {
+                        "email": email,
+                        "name": user_name,
+                        "role": user_role,
+                        "username": username,
+                        "is_active": True,
+                        "api_authenticated": True
+                    }
+                    
+                    # Store in app storage
+                    try:
+                        app.storage.user['access_token'] = self.access_token
+                        app.storage.user['user_data'] = self.current_user
+                        app.storage.user['login_time'] = datetime.now().isoformat()
+                        app.storage.user['auth_method'] = 'api'
+                    except RuntimeError as e:
+                        if "storage_secret" in str(e):
+                            self._warn_storage_once()
+                    
+                    return {
+                        "success": True,
+                        "message": "Login successful",
+                        "user": self.current_user,
+                        "token": self.access_token
+                    }
+                else:
+                    print(f"API login failed: {response.status_code}")
+                    # Fall through to local login
+                    
+            except Exception as e:
+                print(f"API login error: {e}")
+                # Fall through to local login
+        
+        # Fallback to local authentication
         if email not in self.users:
             return {"success": False, "message": "Invalid email or password"}
         
@@ -100,7 +200,7 @@ class AuthService:
         if not self._verify_password(password, user["password_hash"]):
             return {"success": False, "message": "Invalid email or password"}
         
-        # Create session
+        # Create local session
         session_id = secrets.token_urlsafe(32)
         self.sessions[session_id] = {
             "email": email,
@@ -110,77 +210,72 @@ class AuthService:
             "last_activity": datetime.now()
         }
         
+        self.current_user = {
+            "email": email,
+            "role": user["role"],
+            "name": user["name"]
+        }
+        
         # Store session in app storage
         try:
             app.storage.user['session_id'] = session_id
-            app.storage.user['user_data'] = {
-                "email": email,
-                "role": user["role"],
-                "name": user["name"]
-            }
+            app.storage.user['user_data'] = self.current_user
+            app.storage.user['auth_method'] = 'local'
         except RuntimeError as e:
             if "storage_secret" in str(e):
                 self._warn_storage_once()
-                # Fallback to in-memory session only
-            else:
-                raise e
         
         return {
             "success": True, 
             "message": "Login successful",
-            "user": {
-                "email": email,
-                "role": user["role"],
-                "name": user["name"]
-            }
+            "user": self.current_user
         }
     
     def logout(self):
-        """Logout user and clear session"""
+        """Clear user session and API token"""
+        # Clear current user and token
+        self.current_user = None
+        self.access_token = None
+        
+        # Clear app storage
         try:
-            session_id = app.storage.user.get('session_id')
-            if session_id and session_id in self.sessions:
-                del self.sessions[session_id]
+            if 'session_id' in app.storage.user:
+                session_id = app.storage.user['session_id']
+                # Remove session from memory
+                if session_id in self.sessions:
+                    del self.sessions[session_id]
             
-            # Clear app storage
+            # Clear all user storage
             app.storage.user.clear()
         except RuntimeError as e:
             if "storage_secret" in str(e):
                 self._warn_storage_once()
-                # Clear all sessions as fallback
-                self.sessions.clear()
             else:
                 raise e
     
     def get_current_user(self) -> Optional[Dict]:
-        """Get current authenticated user"""
+        """Get currently logged in user"""
+        # Return in-memory user if available
+        if self.current_user:
+            return self.current_user
+            
+        # Try to restore from app storage
         try:
-            session_id = app.storage.user.get('session_id')
+            if 'user_data' in app.storage.user:
+                user_data = app.storage.user['user_data']
+                self.current_user = user_data
+                
+                # Also restore token if available
+                if 'access_token' in app.storage.user:
+                    self.access_token = app.storage.user['access_token']
+                
+                return user_data
         except RuntimeError as e:
             if "storage_secret" in str(e):
-                # Fallback: no persistent sessions, return None
-                return None
+                self._warn_storage_once()
             else:
                 raise e
-                
-        if not session_id or session_id not in self.sessions:
-            return None
-        
-        session = self.sessions[session_id]
-        
-        # Check session timeout
-        if datetime.now() - session['last_activity'] > self.session_timeout:
-            self.logout()
-            return None
-        
-        # Update last activity
-        session['last_activity'] = datetime.now()
-        
-        return {
-            "email": session["email"],
-            "role": session["role"],
-            "name": session["name"]
-        }
+        return None
     
     def is_authenticated(self) -> bool:
         """Check if user is authenticated"""
@@ -210,6 +305,100 @@ class AuthService:
             return False
         return True
     
+    def get_authenticated_headers(self) -> Dict[str, str]:
+        """Get headers for API requests with authentication"""
+        headers = {
+            'Content-Type': 'application/json'
+        }
+        
+        # Add Bearer token if available
+        if self.access_token:
+            headers['Authorization'] = f'Bearer {self.access_token}'
+        
+        # Add user info for tracking if available
+        user = self.get_current_user()
+        if user:
+            headers['X-User-Email'] = user.get('email', '')
+            headers['X-User-Role'] = user.get('role', '')
+        
+        return headers
+    
+    def api_register_user(self, email: str, password: str, name: str, role: str = "job_seeker") -> Dict:
+        """Register user using API only (no local fallback)"""
+        if not self.base_url:
+            return {"success": False, "message": "API service not available"}
+            
+        try:
+            # Map role to API expectations
+            role_mapping = {
+                "vendor": "employer",
+                "employer": "employer", 
+                "job_seeker": "candidate",
+                "user": "candidate",
+                "admin": "admin"
+            }
+            api_role = role_mapping.get(role, "candidate")  # Default to candidate
+            
+            # Create username from email (before @ symbol) if not provided separately
+            username = email.split('@')[0] if email else name.lower().replace(' ', '_')
+            
+            data = {
+                "username": username,
+                "email": email,
+                "password": password,
+                "full_name": name,
+                "role": api_role
+            }
+            
+            response = requests.post(
+                f"{self.base_url}/users/register",
+                data=data,  # Send as form data instead of JSON
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                response_data = response.json()
+                
+                # Store user info locally for login role mapping
+                user_info = {
+                    "username": username,
+                    "role": role,  # Store the original role, not the API role
+                    "name": name,
+                    "created_at": datetime.now().isoformat(),
+                    "api_registered": True
+                }
+                self.users[email] = user_info
+                self._save_users()
+                
+                return {
+                    "success": True,
+                    "message": response_data.get("message", "Registration successful! Please login with your credentials."),
+                    "user": {
+                        "username": username,
+                        "email": email,
+                        "name": name,
+                        "role": role  # Return the role as expected by the app
+                    }
+                }
+            else:
+                error_data = response.json() if response.headers.get('content-type', '').startswith('application/json') else {}
+                raw_detail = error_data.get("detail", f"Registration failed (HTTP {response.status_code})")
+                
+                # Handle case where detail might be a list or other non-string type
+                if isinstance(raw_detail, list):
+                    error_message = "; ".join(str(item) for item in raw_detail)
+                else:
+                    error_message = str(raw_detail)
+                    
+                return {"success": False, "message": error_message}
+                
+        except requests.exceptions.Timeout:
+            return {"success": False, "message": "Registration request timed out. Please try again."}
+        except requests.exceptions.ConnectionError:
+            return {"success": False, "message": "Unable to connect to registration service. Please check your internet connection."}
+        except Exception as e:
+            return {"success": False, "message": f"Registration error: {str(e)}"}
+
     def get_user_stats(self, email: str) -> Dict:
         """Get user statistics (for vendor dashboard)"""
         # This would typically query the database for user-specific stats

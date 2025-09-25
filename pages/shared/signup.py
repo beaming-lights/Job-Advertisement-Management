@@ -49,14 +49,20 @@ def signup_page():
         }
         .role-selector {
             transition: all 0.3s ease;
+            cursor: pointer;
         }
         .role-selector:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border-color: #00b074 !important;
         }
         .role-selected {
-            border-color: #10b981 !important;
-            background-color: #ecfdf5 !important;
+            border-color: #00b074 !important;
+            background-color: #f0fdf4 !important;
+            box-shadow: 0 4px 15px rgba(0, 176, 116, 0.2) !important;
+        }
+        .role-selector .q-card__section {
+            padding: 0 !important;
         }
         </style>
     """)
@@ -70,54 +76,116 @@ def signup_page():
         "email": "",
         "password": "",
         "confirm_password": "",
-        "role": "user",  # Default to user
+        "role": "job_seeker",  # Default to job_seeker
         "terms_accepted": False
     }
     
     def handle_signup():
-        """Handle signup form submission"""
-        # Validation
+        """Handle signup form submission with enhanced API support"""
+        # Enhanced validation
         if not all([form_data["name"], form_data["email"], form_data["password"], form_data["confirm_password"]]):
             ui.notify("Please fill in all fields", type="negative")
             return
         
+        # Validate email format
+        if "@" not in form_data["email"] or "." not in form_data["email"]:
+            ui.notify("Please enter a valid email address", type="negative")
+            return
+        
+        # Password validation
         if form_data["password"] != form_data["confirm_password"]:
             ui.notify("Passwords do not match", type="negative")
             return
         
         if len(form_data["password"]) < 6:
-            ui.notify("Password must be at least 6 characters", type="negative")
+            ui.notify("Password must be at least 6 characters long", type="negative")
             return
+        
+        # Password strength check
+        if form_data["password"].isdigit() or form_data["password"].isalpha():
+            ui.notify("Password should contain both letters and numbers for better security", type="warning")
         
         if not form_data["terms_accepted"]:
-            ui.notify("Please accept the terms and conditions", type="negative")
+            ui.notify("Please accept the terms and conditions to continue", type="negative")
             return
         
-        # Register user
-        result = auth_service.register_user(
-            form_data["email"],
-            form_data["password"],
-            form_data["name"],
-            form_data["role"]
-        )
+        # Validate role selection (should always have a role, but double-check)
+        if not form_data["role"]:
+            ui.notify("Please select your account type", type="negative")
+            return
         
-        if result["success"]:
-            ui.notify("Account created successfully! Please log in.", type="positive")
-            ui.navigate.to("/login")
-        else:
-            ui.notify(result["message"], type="negative")
+        # Show confirmation with selected role
+        role_display = "Employer/Vendor" if form_data["role"] == "vendor" else "Job Seeker"
+        ui.notify(f"Creating your {role_display} account...", type="info")
+        
+        try:
+            # Try API registration first
+            result = auth_service.api_register_user(
+                form_data["email"],
+                form_data["password"],
+                form_data["name"],
+                form_data["role"]
+            )
+            
+            if result["success"]:
+                ui.notify("Account created successfully! Please log in with your new credentials.", type="positive")
+                # Auto-navigate to login after successful registration
+                ui.navigate.to("/login")
+            else:
+                # API registration failed, try fallback
+                error_msg = result["message"]
+                
+                if "not available" in error_msg:
+                    # API service not available, try local registration
+                    ui.notify("API service unavailable, trying local registration...", type="info")
+                    
+                    fallback_result = auth_service.register_user(
+                        form_data["email"],
+                        form_data["password"],
+                        form_data["name"],
+                        form_data["role"]
+                    )
+                    
+                    if fallback_result["success"]:
+                        ui.notify("Account created locally! Please log in.", type="positive")
+                        ui.navigate.to("/login")
+                    else:
+                        ui.notify(fallback_result["message"], type="negative")
+                else:
+                    # Handle specific API errors - ensure error_msg is a string
+                    error_str = str(error_msg) if error_msg else "Unknown error"
+                    error_lower = error_str.lower()
+                    
+                    if "already" in error_lower or "exist" in error_lower:
+                        ui.notify("An account with this email already exists. Please try logging in instead.", type="warning")
+                    elif "invalid" in error_lower:
+                        ui.notify("Invalid registration data. Please check your information and try again.", type="negative")
+                    else:
+                        ui.notify(f"Registration failed: {error_str}", type="negative")
+        
+        except Exception as e:
+            ui.notify(f"An unexpected error occurred during registration: {str(e)}", type="negative")
     
     def select_role(role: str):
-        """Handle role selection"""
+        """Handle role selection with visual feedback"""
+        # Update form data
         form_data["role"] = role
-        # Update UI to show selected role
-        vendor_card.classes(remove="role-selected" if role != "vendor" else "")
-        user_card.classes(remove="role-selected" if role != "user" else "")
         
+        # Remove selection styling from both cards
+        vendor_card.classes(remove="role-selected")
+        user_card.classes(remove="role-selected")
+        
+        # Add selection styling to the chosen card and update labels
         if role == "vendor":
             vendor_card.classes(add="role-selected")
-        else:
-            user_card.classes(add="role-selected")
+            selected_role_label.set_text("Selected: Employer/Vendor")
+            role_description.set_text("As an Employer, you'll be able to post unlimited job listings, manage applications, connect with talented candidates, and build your team.")
+            ui.notify("You'll be able to post jobs and hire talent", type="info")
+        else:  # job_seeker
+            user_card.classes(add="role-selected") 
+            selected_role_label.set_text("Selected: Job Seeker")
+            role_description.set_text("As a Job Seeker, you'll be able to browse job listings, save favorite jobs, apply for positions, and track your application status.")
+            ui.notify("You'll be able to browse and apply for jobs", type="info")
     
     # Hero Section
     with ui.element("section").classes("bg-gradient-to-br from-green-100 to-green-200 text-green-400 py-20 min-h-screen flex items-center").style(
@@ -157,23 +225,31 @@ def signup_page():
                         # Role selection
                         with ui.column().classes("space-y-3"):
                             ui.label("I am a:").classes("text-sm font-semibold text-[#2b3940]")
+                            ui.label("Choose your account type").classes("text-xs text-gray-600 mb-2")
+                            
+                            # Selected role display
+                            selected_role_label = ui.label("Selected: Job Seeker").classes("text-xs text-[#00b074] font-medium mb-1")
                             
                             with ui.row().classes("w-full space-x-3"):
-                                # Vendor option
-                                with ui.card().classes("role-selector flex-1 p-4 cursor-pointer border-2 border-gray-200 hover:border-blue-400") as vendor_card:
+                                # Employer/Vendor option
+                                with ui.card().classes("role-selector flex-1 p-4 cursor-pointer border-2 border-gray-300 hover:border-[#00b074] transition-all") as vendor_card:
                                     vendor_card.on('click', lambda: select_role('vendor'))
                                     with ui.column().classes("items-center text-center space-y-2"):
-                                        ui.icon("business", size="lg").classes("text-blue-600")
-                                        ui.label("Vendor").classes("font-semibold text-[#2b3940]")
-                                        ui.label("Post jobs & hire").classes("text-xs text-[#2b3940]")
+                                        ui.icon("business", size="lg").classes("text-[#00b074]")
+                                        ui.label("Employer").classes("font-semibold text-[#2b3940]")
+                                        ui.label("Post jobs & hire talent").classes("text-xs text-gray-600")
                                 
-                                # User option  
-                                with ui.card().classes("role-selector role-selected flex-1 p-4 cursor-pointer border-2 border-emerald-500 bg-emerald-50") as user_card:
-                                    user_card.on('click', lambda: select_role('user'))
+                                # Job Seeker option (default selected)
+                                with ui.card().classes("role-selector role-selected flex-1 p-4 cursor-pointer border-2 border-[#00b074] bg-green-50 transition-all") as user_card:
+                                    user_card.on('click', lambda: select_role('job_seeker'))
                                     with ui.column().classes("items-center text-center space-y-2"):
-                                        ui.icon("person", size="lg").classes("text-emerald-600")
+                                        ui.icon("person_search", size="lg").classes("text-[#00b074]")
                                         ui.label("Job Seeker").classes("font-semibold text-[#2b3940]")
-                                        ui.label("Find opportunities").classes("text-xs text-[#2b3940]")
+                                        ui.label("Find job opportunities").classes("text-xs text-gray-600")
+                        
+                        # Role description
+                        with ui.card().classes("p-3 bg-blue-50 border border-blue-200"):
+                            role_description = ui.label("As a Job Seeker, you'll be able to browse job listings, save favorite jobs, and apply for positions that match your skills.").classes("text-xs text-blue-700")
                         
                         # Name field
                         with ui.column().classes("space-y-2"):
@@ -227,7 +303,7 @@ def signup_page():
                         ui.button(
                             "Create Account",
                             on_click=handle_signup,
-                            color="#3b82f6"
+                            color="#00b074"
                         ).props("unelevated size=lg").classes("w-full py-3 text-white font-semibold text-lg shadow-lg hover:shadow-xl transition-all")
                         
                         # Login link

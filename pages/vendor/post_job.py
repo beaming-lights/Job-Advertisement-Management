@@ -100,7 +100,7 @@ def post_job_page():
             "requirements": form_data.get("requirements", "Requirements will be discussed during interview"),
             "date_posted": "2024-01-15",
             "contact_email": "hr@company.com",
-            "vendor_id": "vendor_1"
+            "vendor_id": auth_service.get_current_user().get('email', 'vendor_1')
         }
 
         # Get the file object if it exists
@@ -310,5 +310,4 @@ def post_job_page():
                                 "Specify start date and application deadline"
                             ).classes("text-gray-600 text-sm")
 
-    # Footer
-    create_footer()
+ 

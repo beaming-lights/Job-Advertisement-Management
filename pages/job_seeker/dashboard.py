@@ -57,53 +57,115 @@ def job_seeker_dashboard_page():
         # Main Content with Side Navigation
         with ui.row().classes("w-full min-h-screen no-wrap gap-6"):
             # Left Navigation
-            with ui.column().classes("w-1/4 bg-gray-100 p-6 space-y-2 rounded-lg shadow-sm"):
-                ui.label("Dashboard").classes("text-xl font-bold p-2 mb-4")
-                overview_button = (
+            with ui.column().classes("w-1/4 bg-white p-6 space-y-3 rounded-xl shadow-lg border border-gray-100"):
+                # Dashboard Header
+                with ui.row().classes("items-center gap-3 mb-6"):
+                    ui.icon("dashboard", size="1.5rem").classes("text-[#00b074]")
+                    ui.label("Dashboard Menu").classes("text-xl font-bold text-gray-800")
+                
+                # Main Dashboard Navigation
+                dashboard_button = (
                     ui.button(
-                        "Overview",
-                        icon="dashboard",
+                        "🏠 Dashboard Home",
+                        icon="home",
                         on_click=lambda: show_content("overview"),
                     )
                     .props("flat dense align=left")
-                    .classes("w-full text-sm")
+                    .classes("w-full text-sm font-medium py-3 px-4 rounded-lg hover:bg-[#00b074] hover:text-white transition-all")
+                )
+                
+                # Separator
+                ui.separator().classes("my-3")
+                
+                # Job-related sections
+                ui.label("Job Search").classes("text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 mb-2")
+                
+                overview_button = (
+                    ui.button(
+                        "📊 Overview",
+                        icon="analytics",
+                        on_click=lambda: show_content("overview"),
+                    )
+                    .props("flat dense align=left")
+                    .classes("w-full text-sm font-medium py-2 px-4 rounded-lg hover:bg-gray-100 transition-all")
                 )
                 saved_jobs_button = (
                     ui.button(
-                        "Saved Jobs",
+                        "🔖 Saved Jobs",
                         icon="bookmark",
                         on_click=lambda: show_content("saved_jobs"),
                     )
                     .props("flat dense align=left")
-                    .classes("w-full text-sm")
+                    .classes("w-full text-sm font-medium py-2 px-4 rounded-lg hover:bg-gray-100 transition-all")
                 )
                 applications_button = (
                     ui.button(
-                        "My Applications",
+                        "💼 My Applications",
                         icon="work",
                         on_click=lambda: show_content("applications"),
                     )
                     .props("flat dense align=left")
-                    .classes("w-full text-sm")
+                    .classes("w-full text-sm font-medium py-2 px-4 rounded-lg hover:bg-gray-100 transition-all")
                 )
                 recommendations_button = (
                     ui.button(
-                        "Recommended Roles",
+                        "⭐ Recommendations",
                         icon="star",
                         on_click=lambda: show_content("recommendations"),
                     )
                     .props("flat dense align=left")
-                    .classes("w-full text-sm")
+                    .classes("w-full text-sm font-medium py-2 px-4 rounded-lg hover:bg-gray-100 transition-all")
+                )
+                
+                # Separator
+                ui.separator().classes("my-3")
+                
+                # Profile sections
+                ui.label("Profile & Settings").classes("text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 mb-2")
+                
+                profile_button = (
+                    ui.button(
+                        "👤 My Profile",
+                        icon="person",
+                        on_click=lambda: ui.navigate.to("/candidate-profile"),
+                    )
+                    .props("flat dense align=left")
+                    .classes("w-full text-sm font-medium py-2 px-4 rounded-lg hover:bg-blue-100 hover:text-blue-700 transition-all")
+                )
+                edit_profile_button = (
+                    ui.button(
+                        "✏️ Edit Profile",
+                        icon="edit",
+                        on_click=lambda: ui.navigate.to("/candidate-edit-profile"),
+                    )
+                    .props("flat dense align=left")
+                    .classes("w-full text-sm font-medium py-2 px-4 rounded-lg hover:bg-blue-100 hover:text-blue-700 transition-all")
                 )
                 settings_button = (
                     ui.button(
-                        "Settings",
+                        "⚙️ Settings",
                         icon="settings",
                         on_click=lambda: show_content("settings"),
                     )
                     .props("flat dense align=left")
-                    .classes("w-full text-sm")
+                    .classes("w-full text-sm font-medium py-2 px-4 rounded-lg hover:bg-gray-100 transition-all")
                 )
+                
+                # Quick Actions
+                ui.separator().classes("my-3")
+                ui.label("Quick Actions").classes("text-xs font-semibold text-gray-500 uppercase tracking-wide px-4 mb-2")
+                
+                ui.button(
+                    "🔍 Browse Jobs",
+                    icon="search",
+                    on_click=lambda: ui.navigate.to("/jobs"),
+                ).props("flat dense align=left").classes("w-full text-sm font-medium py-2 px-4 rounded-lg hover:bg-green-100 hover:text-green-700 transition-all")
+                
+                ui.button(
+                    "📝 Update Resume",
+                    icon="description",
+                    on_click=lambda: ui.navigate.to("/candidate-edit-profile"),
+                ).props("flat dense align=left").classes("w-full text-sm font-medium py-2 px-4 rounded-lg hover:bg-green-100 hover:text-green-700 transition-all")
 
             # Right Content Area
             with ui.column().classes("w-3/4 p-8 overflow-y-auto bg-white rounded-lg shadow-sm"):
@@ -119,22 +181,33 @@ def job_seeker_dashboard_page():
                 current_section = {"value": "overview"}
 
                 def update_button_styles(active_section: str):
-                    """Update button styles based on active section"""
-                    overview_button.props(
-                        'color="#00b074"' if active_section == "overview" else "color=default"
-                    )
-                    saved_jobs_button.props(
-                        'color="#00b074"' if active_section == "saved_jobs" else "color=default"
-                    )
-                    applications_button.props(
-                        'color="#00b074"' if active_section == "applications" else "color=default"
-                    )
-                    recommendations_button.props(
-                        'color="#00b074"' if active_section == "recommendations" else "color=default"
-                    )
-                    settings_button.props(
-                        'color="#00b074"' if active_section == "settings" else "color=default"
-                    )
+                    """Update button styles based on active section with modern styling"""
+                    # Remove active classes from all buttons first
+                    buttons = [dashboard_button, overview_button, saved_jobs_button, applications_button, recommendations_button, settings_button]
+                    for btn in buttons:
+                        btn.classes(remove="bg-[#00b074] text-white shadow-lg")
+                        btn.classes(add="hover:bg-gray-100")
+                    
+                    # Add active styling to the current section
+                    active_button = None
+                    if active_section == "overview":
+                        active_button = dashboard_button
+                    elif active_section == "saved_jobs":
+                        active_button = saved_jobs_button
+                    elif active_section == "applications":
+                        active_button = applications_button
+                    elif active_section == "recommendations":
+                        active_button = recommendations_button
+                    elif active_section == "settings":
+                        active_button = settings_button
+                    
+                    if active_button:
+                        active_button.classes(remove="hover:bg-gray-100")
+                        active_button.classes(add="bg-[#00b074] text-white shadow-lg")
+                    
+                    # Profile buttons maintain their hover styles
+                    profile_button.classes("hover:bg-blue-100 hover:text-blue-700")
+                    edit_profile_button.classes("hover:bg-blue-100 hover:text-blue-700")
 
                 def show_content(section: str):
                     """Clear and show only the selected section content"""

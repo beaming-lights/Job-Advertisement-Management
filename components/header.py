@@ -42,8 +42,8 @@ def create_header():
                     "color: #2b3940 !important"
                 ).classes("no-underline uppercase")
 
-                # Show "POST A JOB" only for vendors or unauthenticated users
-                if not is_authenticated or is_vendor:
+                # Show "POST A JOB" only for vendors (not for unauthenticated users)
+                if is_vendor:
                     ui.link("POST A JOB", target="/post-job").style(
                         "color: #2b3940 !important"
                     ).classes("no-underline uppercase")
@@ -100,6 +100,12 @@ def create_header():
                                 )
                                 ui.separator()
 
+                            # Home link for all authenticated users
+                            ui.menu_item(
+                                "Home",
+                                on_click=lambda: ui.navigate.to("/"),
+                                auto_close=True,
+                            )
                             ui.menu_item(
                                 "Browse Jobs",
                                 on_click=lambda: ui.navigate.to("/jobs"),
@@ -137,8 +143,8 @@ def create_header():
                             "text-dark text-lg py-2 px-4 hover:bg-gray-100 rounded w-full block no-underline uppercase text-sm font-medium"
                         )
                         
-                        # Show "POST A JOB" only for vendors or unauthenticated users
-                        if not is_authenticated or is_vendor:
+                        # Show "POST A JOB" only for vendors (not for unauthenticated users)
+                        if is_vendor:
                             ui.link("Post a Job", target="/post-job").classes(
                                 "text-dark text-lg py-2 px-4 hover:bg-gray-100 rounded w-full block no-underline uppercase text-sm font-medium"
                             )
